@@ -1033,10 +1033,11 @@ public class UpdateLog implements PluginInfoInitialized, SolrMetricProducer {
   // version of the *completed* update.  There can be updates in progress concurrently
   // that have already grabbed higher version numbers.  Higher level coordination or
   // synchronization is needed for stronger guarantees (as VersionUpdateProcessor does).
-  public Long lookupVersion(BytesRef indexedId) {
+  public Long lookupVersion(BytesRef indexedId, boolean shouldLookupInIndex) {
     LogPtr entry;
     TransactionLog lookupLog;
 
+    	if (shouldLookupInIndex) {
     synchronized (this) {
       entry = map.get(indexedId);
       lookupLog = tlog;  // something found in "map" will always be in "tlog"
@@ -1065,6 +1066,7 @@ public class UpdateLog implements PluginInfoInitialized, SolrMetricProducer {
     if (version != null) {
       return version;
     }
+      }
 
     // We can't get any version info for deletes from the index, so if the doc
     // wasn't found, check a cache of recent deletes.
